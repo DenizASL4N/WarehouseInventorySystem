@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Warehouse IMS{% endblock %}
+
+{% block content %}
+  <div class="px-4 py-5 my-5 text-center">
+    <h1 class="display-5 fw-bold">Warehouse Inventory Management System</h1>
+    <div class="col-lg-6 mx-auto">
+      <p class="lead mb-4">
+        Welcome to the IMS. Manage your products, orders, and suppliers efficiently.
+      </p>
+      {% if not current_user.is_authenticated %}
+      <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+        <a href="{{ url_for('auth.login') }}" class="btn btn-primary btn-lg px-4 gap-3">Login</a>
+        <a href="{{ url_for('auth.register') }}" class="btn btn-outline-secondary btn-lg px-4">Register</a>
+      </div>
+      {% else %}
+      <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+          <a href="{{ url_for('main.dashboard') }}" class="btn btn-success btn-lg px-4">Go to Dashboard</a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}

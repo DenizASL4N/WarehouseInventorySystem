@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} - Warehouse IMS{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">{{ title }}</h1>
+    <a href="{{ url_for('main.reports_index') }}" class="btn btn-sm btn-outline-secondary">Back to Reports</a>
+</div>
+
+{% if products %}
+<div class="table-responsive">
+    <table class="table table-striped table-hover table-sm">
+        <thead>
+            <tr>
+                <th>Product Name</th>
+                <th class="text-center">Stock Quantity</th>
+                <th class="text-center">Low Stock Threshold</th>
+                <th>Category</th>
+                <th>Supplier</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for product in products %}
+            <tr class_="{{ 'table-danger' if product.quantity_in_stock < product.low_stock_threshold / 2 else ('table-warning' if product.quantity_in_stock <= product.low_stock_threshold else '') }}">
+                <td><a href="{{ url_for('products.product_detail', product_id=product.id) }}">{{ product.name }}</a></td>
+                <td class="text-center">{{ product.quantity_in_stock }}</td>
+                <td class="text-center">{{ product.low_stock_threshold }}</td>
+                <td>{{ product.category if product.category else 'N/A' }}</td>
+                <td>{{ product.supplier_details.name if product.supplier_details else 'N/A' }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="alert alert-success" role="alert">
+    No products are currently low on stock. Well done!
+</div>
+{% endif %}
+{% endblock %}

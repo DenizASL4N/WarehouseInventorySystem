@@ -1,0 +1,190 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} - Warehouse IMS{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Welcome to your Dashboard, {{ current_user.username }}!</h1>
+</div>
+
+<p class="lead mb-4">Your Role: <span class="badge bg-primary fs-6">{{ user_role }}</span></p>
+
+{# Common Section: User's Recent Orders #}
+{% if dashboard_data.get('recent_user_orders') %}
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">Your Last 3 Orders</h5>
+    </div>
+    <div class="list-group list-group-flush">
+        {% for order in dashboard_data.recent_user_orders %}
+        <a href="{{ url_for('orders.order_detail', order_id=order.id) }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+            <span>Order #{{ order.order_number }} ({{ order.order_date.strftime('%b %d, %Y') }}) - ${{ "%.2f"|format(order.total_amount) }}</span>
+            <span class="badge
+                {% if order.status == 'Pending' %}bg-warning text-dark
+                {% elif order.status == 'Processing' %}bg-info text-dark
+                {% elif order.status == 'Shipped' %}bg-primary
+                {% elif order.status == 'Delivered' %}bg-success
+                {% elif order.status == 'Cancelled' %}bg-danger
+                {% else %}bg-secondary
+                {% endif %}">
+                {{ order.status }}
+            </span>
+        </a>
+        {% else %} {# This else belongs to 'for order in dashboard_data.recent_user_orders' #}
+        <div class="list-group-item">You have not placed any orders yet.</div>
+        {% endfor %} {# This endfor closes the loop for recent_user_orders #}
+    </div>
+</div>
+{% endif %}
+
+
+{# --- Admin Specific Dashboard --- #}
+{% if user_role == 'Admin' %}
+<div class="row">
+    <div class="col-md-12"><h3>Admin Overview</h3><hr></div>
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-start border-primary border-4 shadow h-100 py-2">
+            <div class="card-body"><div class="row align-items-center"><div class="col">
+                <div class="text-xs fw-bold text-primary text-uppercase mb-1">Total Users</div>
+                <div class="h5 mb-0 fw-bold text-gray-800">{{ dashboard_data.get('total_users', 0) }}</div>
+            </div></div></div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-start border-success border-4 shadow h-100 py-2">
+            <div class="card-body"><div class="row align-items-center"><div class="col">
+                <div class="text-xs fw-bold text-success text-uppercase mb-1">Total Products</div>
+                <div class="h5 mb-0 fw-bold text-gray-800">{{ dashboard_data.get('total_products_in_system', 0) }}</div>
+            </div></div></div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-start border-info border-4 shadow h-100 py-2">
+            <div class="card-body"><div class="row align-items-center"><div class="col">
+                <div class="text-xs fw-bold text-info text-uppercase mb-1">System Orders</div>
+                <div class="h5 mb-0 fw-bold text-gray-800">{{ dashboard_data.get('all_system_orders_count', 0) }}</div>
+            </div></div></div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-start border-warning border-4 shadow h-100 py-2">
+            <div class="card-body"><div class="row align-items-center"><div class="col">
+                <div class="text-xs fw-bold text-warning text-uppercase mb-1">Pending Orders</div>
+                <div class="h5 mb-0 fw-bold text-gray-800">{{ dashboard_data.get('pending_orders_count', 0) }}</div>
+            </div></div></div>
+        </div>
+    </div>
+</div>
+<h5>Quick Management Links:</h5>
+<p>
+    <a href="{{ url_for('admin.list_users') }}" class="btn btn-outline-primary btn-sm">Manage Users</a>
+    <a href="{{ url_for('products.add_product') }}" class="btn btn-outline-success btn-sm">Add New Product</a>
+    <a href="{{ url_for('suppliers.add_supplier') }}" class="btn btn-outline-secondary btn-sm">Add New Supplier</a>
+    <a href="{{ url_for('warehouses.add_warehouse') }}" class="btn btn-outline-dark btn-sm">Add New Warehouse</a>
+    <a href="{{ url_for('main.reports_index') }}" class="btn btn-outline-info btn-sm">View All Reports</a>
+</p>
+{% if dashboard_data.get('latest_products') %}
+    <h5 class="mt-4">Recently Added Products</h5>
+    <ul class="list-group">
+        {% for product in dashboard_data.latest_products %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <a href="{{ url_for('products.product_detail', product_id=product.id) }}">{{ product.name }}</a>
+                <span class="badge bg-light text-dark">Stock: {{ product.quantity_in_stock }}</span>
+            </li>
+        {% else %}
+            <li class="list-group-item">No products added recently.</li>
+        {% endfor %}
+    </ul>
+{% endif %}
+
+{# --- WarehouseManager Specific Dashboard --- #}
+{% elif user_role == 'WarehouseManager' %}
+<div class="row">
+    <div class="col-md-12"><h3>Warehouse Manager Overview</h3><hr></div>
+    <div class="col-md-3 mb-3"><div class="card text-center"><div class="card-body"><h5 class="card-title">Total Products</h5><p class="card-text fs-3">{{ dashboard_data.get('total_products_in_system', 0) }}</p></div></div></div>
+    <div class="col-md-3 mb-3"><div class="card text-center {% if dashboard_data.get('low_stock_products_count', 0) > 0 %}border-danger{% endif %}"><div class="card-body"><h5 class="card-title">Low Stock Items</h5><p class="card-text fs-3 text-danger">{{ dashboard_data.get('low_stock_products_count', 0) }}</p><a href="{{ url_for('main.low_stock_report') }}" class="btn btn-sm btn-warning">View Report</a></div></div></div>
+    <div class="col-md-3 mb-3"><div class="card text-center"><div class="card-body"><h5 class="card-title">Pending Orders</h5><p class="card-text fs-3">{{ dashboard_data.get('pending_orders_count', 0) }}</p></div></div></div>
+    <div class="col-md-3 mb-3"><div class="card text-center"><div class="card-body"><h5 class="card-title">Total Warehouses</h5><p class="card-text fs-3">{{ dashboard_data.get('total_warehouses', 0) }}</p></div></div></div>
+</div>
+<h5>Quick Actions:</h5>
+<p>
+    <a href="{{ url_for('products.add_product') }}" class="btn btn-outline-success btn-sm">Add New Product</a>
+    <a href="{{ url_for('suppliers.list_suppliers') }}" class="btn btn-outline-secondary btn-sm">Manage Suppliers</a>
+    <a href="{{ url_for('warehouses.list_warehouses') }}" class="btn btn-outline-dark btn-sm">Manage Warehouses</a>
+    <a href="{{ url_for('main.reports_index') }}" class="btn btn-outline-info btn-sm">View Reports</a>
+</p>
+{% if dashboard_data.get('expiring_soon_products') %}
+    <h5 class="mt-4">Products Expiring Soon (Next 30 Days)</h5>
+    <ul class="list-group">
+        {% for product in dashboard_data.expiring_soon_products %}
+             <li class="list-group-item d-flex justify-content-between align-items-center">
+                <a href="{{ url_for('products.product_detail', product_id=product.id) }}">{{product.name}}</a>
+                <span>Expires: {{product.expiry_date.strftime('%Y-%m-%d') if product.expiry_date else 'N/A'}} (Stock: {{product.quantity_in_stock}})</span>
+            </li>
+        {% else %}
+            <li class="list-group-item">No products expiring soon.</li>
+        {% endfor %}
+    </ul>
+{% endif %}
+
+{# --- InventoryStaff Specific Dashboard --- #}
+{% elif user_role == 'InventoryStaff' %}
+<div class="row">
+    <div class="col-md-12"><h3>Inventory Staff Dashboard</h3><hr></div>
+    <div class="col-md-4 mb-3"><div class="card text-center"><div class="card-body"><h5 class="card-title">Total Units in Stock</h5><p class="card-text fs-3">{{ dashboard_data.get('total_products_in_stock_units', 0) }}</p></div></div></div>
+    <div class="col-md-4 mb-3"><div class="card text-center {% if dashboard_data.get('low_stock_products_count', 0) > 0 %}border-danger{% endif %}"><div class="card-body"><h5 class="card-title">Low Stock Items</h5><p class="card-text fs-3 text-danger">{{ dashboard_data.get('low_stock_products_count', 0) }}</p><a href="{{ url_for('main.low_stock_report') }}" class="btn btn-sm btn-warning">View Report</a></div></div></div>
+    <div class="col-md-4 mb-3"><div class="card text-center"><div class="card-body"><h5 class="card-title">Expiring Soon (15 days)</h5><p class="card-text fs-3">{{ dashboard_data.get('expiring_soon_count_staff', 0) }}</p><a href="{{ url_for('main.inventory_aging_report') }}" class="btn btn-sm btn-info">View Report</a></div></div></div>
+</div>
+<h5>Quick Access:</h5>
+<p>
+    <a href="{{ url_for('products.list_products') }}" class="btn btn-outline-primary btn-sm">View All Products</a>
+    <a href="{{ url_for('main.reports_index') }}" class="btn btn-outline-info btn-sm">View Operational Reports</a>
+</p>
+
+{# --- SalesTeam Specific Dashboard --- #}
+{% elif user_role == 'SalesTeam' %}
+<div class="row">
+    <div class="col-md-12"><h3>Sales Team Dashboard</h3><hr></div>
+    <div class="col-md-4 mb-3"><div class="card text-center bg-success text-white"><div class="card-body"><h5 class="card-title">Orders Today</h5><p class="card-text fs-3">{{ dashboard_data.get('orders_today_count', 0) }}</p></div></div></div>
+    <div class="col-md-4 mb-3"><div class="card text-center bg-primary text-white"><div class="card-body"><h5 class="card-title">Sales Today</h5><p class="card-text fs-3">${{ "%.2f"|format(dashboard_data.get('sales_today_amount', 0.0)) }}</p></div></div></div>
+    <div class="col-md-4 mb-3"><div class="card text-center"><div class="card-body"><h5 class="card-title">Your Orders</h5><p class="card-text fs-3">{{ dashboard_data.recent_user_orders|length }} <small>(last 3)</small></p><a href="{{ url_for('orders.list_orders') }}" class="btn btn-sm btn-secondary">View All Yours</a></div></div></div>
+</div>
+<h5>Quick Links & Insights:</h5>
+<p>
+    <a href="{{ url_for('products.list_products') }}" class="btn btn-outline-primary btn-sm">Browse Products & Stock</a>
+    <a href="{{ url_for('main.reports_index') }}" class="btn btn-outline-info btn-sm">View Sales Reports</a>
+</p>
+{% if dashboard_data.get('top_selling_products_30d') %}
+    <h5 class="mt-4">Top Selling Products (Last 30 Days by Quantity)</h5>
+    <ol class="list-group list-group-numbered">
+        {% for product_name, product_id, total_sold in dashboard_data.top_selling_products_30d %}
+            <li class="list-group-item d-flex justify-content-between align-items-start">
+                <div class="ms-2 me-auto">
+                    <div class="fw-bold"><a href="{{ url_for('products.product_detail', product_id=product_id) }}">{{product_name}}</a></div>
+                </div>
+                <span class="badge bg-primary rounded-pill">{{total_sold}} sold</span>
+            </li>
+        {% else %} {# This else belongs to 'for product_name, ... in dashboard_data.top_selling_products_30d' #}
+            <li class="list-group-item">No sales data for top products in the last 30 days.</li>
+        {% endfor %} {# This endfor closes the loop for top_selling_products_30d #}
+    </ol>
+{% endif %} {# This endif closes the if for dashboard_data.get('top_selling_products_30d') #}
+
+{# --- DEFAULT DASHBOARD (for other roles or if no specific content) --- #}
+{% else %} {# This else belongs to the main if/elif chain for user_role #}
+<div class="alert alert-info" role="alert">
+  <h4 class="alert-heading">Welcome, {{ current_user.username }}!</h4>
+  <p>This is your general dashboard. You can browse products and manage your orders.</p>
+  <hr>
+  <p class="mb-0">
+      You have recently placed <strong>{{ dashboard_data.recent_user_orders|length }}</strong> orders (showing last 3).
+      There are a total of <strong>{{ dashboard_data.get('total_products_in_system', 0) }}</strong> products in the system.
+  </p>
+  <div class="mt-3">
+    <a href="{{ url_for('products.list_products') }}" class="btn btn-primary">Browse Products</a>
+    <a href="{{ url_for('orders.list_orders') }}" class="btn btn-info">View My Orders</a>
+  </div>
+</div>
+{% endif %} {# This endif closes the main if/elif/else chain for user_role #}
+
+{% endblock %}

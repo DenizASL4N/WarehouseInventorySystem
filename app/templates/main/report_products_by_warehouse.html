@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} - Warehouse IMS{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">{{ title }}</h1>
+    <a href="{{ url_for('main.reports_index') }}" class="btn btn-sm btn-outline-secondary">Back to Reports</a>
+</div>
+
+{% if warehouses_with_products %}
+    {% for item in warehouses_with_products %} {# Artık warehouses_with_products'ı döngüye alıyoruz #}
+    <h4 class="mt-4">{{ item.warehouse.name if item.warehouse.name else item.warehouse.address }} (ID: {{ item.warehouse.id }})</h4>
+    {% if item.products %} {# Her depo için ürün listesini kontrol et #}
+        <div class="table-responsive">
+            <table class="table table-bordered table-sm">
+                <thead>
+                    <tr>
+                        <th>Product Name</th>
+                        <th class="text-center">Stock Quantity</th>
+                        <th>Category</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {# DÜZELTME: Artık item.products üzerinden döngü kurulacak ve Product sınıfına referans yok #}
+                    {% for product in item.products %}
+                    <tr>
+                        <td><a href="{{ url_for('products.product_detail', product_id=product.id) }}">{{ product.name }}</a></td>
+                        <td class="text-center">{{ product.quantity_in_stock }}</td>
+                        <td>{{ product.category if product.category else 'N/A' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p>No products currently stored in this warehouse.</p>
+    {% endif %}
+    {% endfor %}
+{% else %}
+<div class="alert alert-info" role="alert">
+    No warehouse locations found. <a href="{{ url_for('warehouses.add_warehouse') }}">Add a warehouse location first.</a>
+</div>
+{% endif %}
+{% endblock %}

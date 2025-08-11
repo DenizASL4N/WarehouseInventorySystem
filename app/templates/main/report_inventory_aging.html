@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} - Warehouse IMS{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">{{ title }}</h1>
+    <a href="{{ url_for('main.reports_index') }}" class="btn btn-sm btn-outline-secondary">Back to Reports</a>
+</div>
+<p>Report Date: {{ today.strftime('%Y-%m-%d') }}</p>
+
+<h4 class="mt-4">Products Expiring Soon (Next 30 Days)</h4>
+{% if expiring_soon %}
+<div class="table-responsive">
+    <table class="table table-warning table-striped table-sm">
+        <thead>
+            <tr>
+                <th>Product Name</th>
+                <th class="text-center">Stock Quantity</th>
+                <th>Expiry Date</th>
+                <th class="text-center">Days to Expiry</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for product in expiring_soon %}
+            <tr>
+                <td><a href="{{ url_for('products.product_detail', product_id=product.id) }}">{{ product.name }}</a></td>
+                <td class="text-center">{{ product.quantity_in_stock }}</td>
+                <td>{{ product.expiry_date.strftime('%Y-%m-%d') }}</td>
+                <td class="text-center">{{ (product.expiry_date - today).days }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<p>No products are expiring in the next 30 days.</p>
+{% endif %}
+
+<h4 class="mt-5">Expired Products</h4>
+{% if expired %}
+<div class="table-responsive">
+    <table class="table table-danger table-striped table-sm">
+        <thead>
+            <tr>
+                <th>Product Name</th>
+                <th class="text-center">Stock Quantity</th>
+                <th>Expiry Date</th>
+                <th class="text-center">Days Past Expiry</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for product in expired %}
+            <tr>
+                <td><a href="{{ url_for('products.product_detail', product_id=product.id) }}">{{ product.name }}</a></td>
+                <td class="text-center">{{ product.quantity_in_stock }}</td>
+                <td>{{ product.expiry_date.strftime('%Y-%m-%d') }}</td>
+                <td class="text-center">{{ (today - product.expiry_date).days }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<p>No expired products found.</p>
+{% endif %}
+{% endblock %}

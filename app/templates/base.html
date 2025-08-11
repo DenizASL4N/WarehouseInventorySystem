@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Warehouse IMS{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="{{ url_for('main.index') }}">IMS</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+              <a class="nav-link {% if request.endpoint == 'main.index' %}active{% endif %}" href="{{ url_for('main.index') }}">Home</a>
+            </li>
+            {% if current_user.is_authenticated %}
+              <li class="nav-item">
+                <a class="nav-link {% if request.endpoint == 'main.dashboard' %}active{% endif %}" href="{{ url_for('main.dashboard') }}">Dashboard</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link {% if request.blueprint == 'products' %}active{% endif %}" href="{{ url_for('products.list_products') }}">Products</a>
+              </li>
+              {% if current_user.role in ['Admin', 'WarehouseManager', 'SalesTeam', 'InventoryStaff'] %}
+              <li class="nav-item">
+                <a class="nav-link {% if request.blueprint == 'suppliers' %}active{% endif %}" href="{{ url_for('suppliers.list_suppliers') }}">Suppliers</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link {% if request.blueprint == 'warehouses' %}active{% endif %}" href="{{ url_for('warehouses.list_warehouses') }}">Warehouses</a>
+              </li>
+              {% endif %}
+              <li class="nav-item">
+                <a class="nav-link {% if request.blueprint == 'orders' %}active{% endif %}" href="{{ url_for('orders.list_orders') }}">My Orders</a>
+              </li>
+              {# Reports link for Admin, WarehouseManager, SalesTeam, InventoryStaff #}
+              {% if current_user.role in ['Admin', 'WarehouseManager', 'SalesTeam', 'InventoryStaff'] %}
+              <li class="nav-item">
+                <a class="nav-link {% if request.endpoint.startswith('main.reports_') or request.endpoint == 'main.reports_index' %}active{% endif %}" href="{{ url_for('main.reports_index') }}">Reports</a>
+              </li>
+              {% endif %}
+              {% if current_user.role == 'Admin' %}
+              <li class="nav-item">
+                <a class="nav-link {% if request.blueprint == 'admin' %}active{% endif %}" href="{{ url_for('admin.list_users') }}">User Management</a>
+              </li>
+              {% endif %}
+            {% endif %}
+          </ul>
+          <ul class="navbar-nav ms-auto">
+            {% if current_user.is_authenticated %}
+              <li class="nav-item">
+                <a class="nav-link {% if request.blueprint == 'cart' %}active{% endif %}" href="{{ url_for('cart.view_cart') }}">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-cart3 me-1" viewBox="0 0 16 16"><path d="M0 1.5A.5.5 0 0 1 .5 1H2a.5.5 0 0 1 .485.379L2.89 3H14.5a.5.5 0 0 1 .49.598l-1 5a.5.5 0 0 1-.465.401l-9.397.472L4.415 11H13a.5.5 0 0 1 0 1H4a.5.5 0 0 1-.491-.408L2.01 3.607 1.61 2H.5a.5.5 0 0 1-.5-.5M3.102 4l.84 4.479 9.144-.459L13.89 4H3.102zM5 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4m7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4m-7 1a1 1 0 1 1 0 2 1 1 0 0 1 0-2m7 1a1 1 0 1 1 0 2 1 1 0 0 1 0-2"/></svg>
+                    Cart
+                    {% if cart_item_count > 0 %}<span class="badge bg-danger rounded-pill ms-1">{{ cart_item_count }}</span>{% endif %}
+                </a>
+              </li>
+            {% endif %}
+            {% if current_user.is_anonymous %}
+            <li class="nav-item"><a class="nav-link {% if request.endpoint == 'auth.login' %}active{% endif %}" href="{{ url_for('auth.login') }}">Login</a></li>
+            <li class="nav-item"><a class="nav-link {% if request.endpoint == 'auth.register' %}active{% endif %}" href="{{ url_for('auth.register') }}">Register</a></li>
+            {% else %}
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarUserDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Hello, {{ current_user.username }} ({{current_user.role}})</a>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarUserDropdown">
+                    <li><a class="dropdown-item" href="#">Profile</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}">Logout</a></li>
+                </ul>
+            </li>
+            {% endif %}
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <div class="container mt-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+    </div>
+    <footer class="container mt-5 pt-3 border-bottom">
+        <p class="text-center text-muted">© {{ current_year }} Warehouse Inventory System. All rights reserved.</p>
+    </footer>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    {% block scripts %}{% endblock %}
+  </body>
+</html>

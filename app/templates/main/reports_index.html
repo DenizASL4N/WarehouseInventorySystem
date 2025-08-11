@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} - Warehouse IMS{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">{{ title }}</h1>
+    {# If you want a button to go back to dashboard or another main page #}
+    {# <a href="{{ url_for('main.dashboard') }}" class="btn btn-sm btn-outline-secondary">Back to Dashboard</a> #}
+</div>
+
+<p class="lead">Select a report below to view detailed analytics about your inventory and sales.</p>
+
+<div class="list-group">
+    <a href="{{ url_for('main.low_stock_report') }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+        Low Stock Products Report
+        <span class="badge bg-danger rounded-pill">Alert</span>
+    </a>
+    <a href="{{ url_for('main.inventory_aging_report') }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+        Inventory Aging Analysis
+        <span class="badge bg-warning text-dark rounded-pill">Monitor</span>
+    </a>
+    <a href="{{ url_for('main.products_by_warehouse_report') }}" class="list-group-item list-group-item-action">
+        Products by Warehouse
+    </a>
+    <a href="{{ url_for('main.recent_orders_report') }}" class="list-group-item list-group-item-action">
+        Recent Orders (Default: Last 30 Days)
+    </a>
+    <a href="{{ url_for('main.most_profitable_products_report') }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+        Most Profitable Products
+        <span class="badge bg-success rounded-pill">Insights</span>
+    </a>
+    <a href="{{ url_for('main.warehouse_capacity_report') }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+        Warehouse Capacity Analysis
+        <span class="badge bg-info text-dark rounded-pill">Logistics</span>
+    </a>
+    {#
+        If you decide to re-add or create other reports, add their links here.
+        For example, if you re-implement "Most Active Customers":
+    <a href="{{ url_for('main.active_customers_report') }}" class="list-group-item list-group-item-action">
+        Most Active Customers
+    </a>
+    #}
+</div>
+
+<div class="mt-4">
+    <p>These reports provide valuable insights into your warehouse operations. Use them to make informed decisions regarding stock management, purchasing, and sales strategies.</p>
+</div>
+{% endblock %}

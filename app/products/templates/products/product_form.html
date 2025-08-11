@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} - Warehouse IMS{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <h2 class="mb-4">{{ legend }}</h2>
+        <form method="POST" action="" novalidate> {# Action boş bırakılırsa aynı URL'ye POST eder #}
+            {{ form.hidden_tag() }} {# CSRF token ve diğer gizli alanlar #}
+
+            <fieldset class="form-group">
+                <div class="mb-3">
+                    {{ form.name.label(class="form-label") }}
+                    {% if form.name.errors %}
+                        {{ form.name(class="form-control form-control-lg is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.name.errors %}<span>{{ error }}</span><br>{% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.name(class="form-control form-control-lg") }}
+                    {% endif %}
+                </div>
+
+                <div class="mb-3">
+                    {{ form.category.label(class="form-label") }}
+                    {% if form.category.errors %}
+                        {{ form.category(class="form-control is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.category.errors %}<span>{{ error }}</span><br>{% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.category(class="form-control") }}
+                    {% endif %}
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        {{ form.quantity_in_stock.label(class="form-label") }}
+                        {% if form.quantity_in_stock.errors %}
+                            {{ form.quantity_in_stock(class="form-control is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.quantity_in_stock.errors %}<span>{{ error }}</span><br>{% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.quantity_in_stock(class="form-control") }}
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        {{ form.price.label(class="form-label") }}
+                        {% if form.price.errors %}
+                            {{ form.price(class="form-control is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.price.errors %}<span>{{ error }}</span><br>{% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.price(class="form-control") }}
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    {{ form.expiry_date.label(class="form-label") }}
+                    {% if form.expiry_date.errors %}
+                        {{ form.expiry_date(class="form-control is-invalid", type="date") }} {# type="date" tarayıcıya tarih seçici göstermesini söyler #}
+                        <div class="invalid-feedback">
+                            {% for error in form.expiry_date.errors %}<span>{{ error }}</span><br>{% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.expiry_date(class="form-control", type="date") }}
+                    {% endif %}
+                </div>
+
+                <div class="mb-3">
+                    {{ form.description.label(class="form-label") }}
+                    {% if form.description.errors %}
+                        {{ form.description(class="form-control is-invalid", rows="3") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.description.errors %}<span>{{ error }}</span><br>{% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.description(class="form-control", rows="3") }}
+                    {% endif %}
+                </div>
+
+                <div class="mb-3">
+                    {{ form.supplier_id.label(class="form-label") }}
+                    {% if form.supplier_id.errors %}
+                        {{ form.supplier_id(class="form-select is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.supplier_id.errors %}<span>{{ error }}</span><br>{% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.supplier_id(class="form-select") }}
+                    {% endif %}
+                </div>
+
+                <div class="mb-3">
+                    {{ form.warehouse_id.label(class="form-label") }}
+                    {% if form.warehouse_id.errors %}
+                        {{ form.warehouse_id(class="form-select is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.warehouse_id.errors %}<span>{{ error }}</span><br>{% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.warehouse_id(class="form-select") }}
+                    {% endif %}
+                </div>
+            </fieldset>
+            <div class="form-group mt-4">
+                {{ form.submit(class="btn btn-primary") }}
+                <a href="{{ url_for('products.list_products') }}" class="btn btn-secondary ms-2">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

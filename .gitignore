@@ -1,0 +1,10 @@
+venv/
+*.pyc
+__pycache__/
+instance/
+.env
+migrations/
+app.db  # Eğer SQLite kullanırsanız
+# PyCharm özel dosyaları
+.idea/
+*.iml

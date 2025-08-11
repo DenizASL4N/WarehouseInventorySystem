@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} - Warehouse IMS{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">{{ title }}</h1>
+    {% if current_user.is_authenticated and current_user.role in ['Admin', 'WarehouseManager'] %}
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a href="{{ url_for('warehouses.add_warehouse') }}" class="btn btn-success">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-house-add-fill me-1" viewBox="0 0 16 16"><path d="M12.5 16a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7m.5-5v1h1a.5.5 0 0 1 0 1h-1v1a.5.5 0 1 1-1 0v-1h-1a.5.5 0 0 1 0-1h1v-1a.5.5 0 0 1 1 0"/><path d="M8.707 1.5a1 1 0 0 0-1.414 0L.646 8.146a.5.5 0 0 0 .708.708L8 2.207l6.646 6.647a.5.5 0 0 0 .708-.708L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293z"/><path d="M8 5.5a2.5 2.5 0 0 0 0 5A2.5 2.5 0 0 0 8 5.5"/></svg>
+            Add New Warehouse
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+{% if warehouses %}
+<div class="table-responsive">
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th scope="col">#ID</th>
+                <th scope="col">Name</th>
+                <th scope="col">Address</th>
+                <th scope="col">Capacity</th>
+                {% if current_user.is_authenticated and current_user.role in ['Admin', 'WarehouseManager'] %}
+                    <th scope="col" style="width: 120px;">Actions</th>
+                {% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for warehouse in warehouses %}
+            <tr>
+                <td>{{ warehouse.id }}</td>
+                <td>{{ warehouse.name if warehouse.name else 'N/A' }}</td>
+                <td>{{ warehouse.address }}</td>
+                <td>{{ warehouse.capacity if warehouse.capacity is not none else 'N/A' }}</td>
+                {% if current_user.is_authenticated and current_user.role in ['Admin', 'WarehouseManager'] %}
+                <td>
+                    <a href="{{ url_for('warehouses.edit_warehouse', warehouse_id=warehouse.id) }}" class="btn btn-sm btn-outline-primary me-1" title="Edit">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16"><path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.813z"/><path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z"/></svg>
+                    </a>
+                    {% if current_user.role == 'Admin' %} {# Sadece Admin silebilir varsayımı #}
+                        {% set current_delete_form = delete_forms.get(warehouse.id) %}
+                        {% if current_delete_form %}
+                            <form action="{{ url_for('warehouses.delete_warehouse', warehouse_id=warehouse.id) }}" method="POST" style="display: inline;">
+                                {{ current_delete_form.hidden_tag() }}
+                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete" onclick="return confirm('Are you sure you want to delete warehouse \'{{ warehouse.name or warehouse.address }}\'?');">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3-fill" viewBox="0 0 16 16"><path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5m-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5M4.5 5.024l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m3.5.012l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m3.5-.002l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06"/></svg>
+                                </button>
+                            </form>
+                        {% endif %}
+                    {% endif %}
+                </td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% if pagination %}<nav aria-label="Warehouse navigation"><ul class="pagination justify-content-center"><li class="page-item {% if not pagination.has_prev %}disabled{% endif %}"><a class="page-link" href="{{ url_for('warehouses.list_warehouses', page=pagination.prev_num) if pagination.has_prev else '#' }}" tabindex="-1" aria-disabled="true">Previous</a></li>{% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}{% if page_num %}{% if pagination.page == page_num %}<li class="page-item active" aria-current="page"><span class="page-link">{{ page_num }}</span></li>{% else %}<li class="page-item"><a class="page-link" href="{{ url_for('warehouses.list_warehouses', page=page_num) }}">{{ page_num }}</a></li>{% endif %}{% else %}<li class="page-item disabled"><span class="page-link">...</span></li>{% endif %}{% endfor %}<li class="page-item {% if not pagination.has_next %}disabled{% endif %}"><a class="page-link" href="{{ url_for('warehouses.list_warehouses', page=pagination.next_num) if pagination.has_next else '#' }}">Next</a></li></ul></nav>{% endif %}
+{% else %}<div class="alert alert-info mt-3" role="alert">No warehouse locations found. {% if current_user.role in ['Admin', 'WarehouseManager'] %}<a href="{{ url_for('warehouses.add_warehouse') }}" class="alert-link">Click here to add a new warehouse location.</a>{% endif %}</div>{% endif %}
+{% endblock %}

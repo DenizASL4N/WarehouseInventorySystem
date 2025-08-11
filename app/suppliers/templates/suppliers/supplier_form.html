@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} - Warehouse IMS{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <h2 class="mb-4">{{ legend }}</h2>
+        <form method="POST" action="" novalidate>
+            {{ form.hidden_tag() }}
+
+            <fieldset class="form-group">
+                <div class="mb-3">
+                    {{ form.name.label(class="form-label") }}
+                    {% if form.name.errors %}
+                        {{ form.name(class="form-control form-control-lg is-invalid") }}
+                        <div class="invalid-feedback">{% for error in form.name.errors %}<span>{{ error }}</span><br>{% endfor %}</div>
+                    {% else %}
+                        {{ form.name(class="form-control form-control-lg") }}
+                    {% endif %}
+                </div>
+
+                <div class="mb-3">
+                    {{ form.contact_name.label(class="form-label") }}
+                    {% if form.contact_name.errors %}
+                        {{ form.contact_name(class="form-control is-invalid") }}
+                        <div class="invalid-feedback">{% for error in form.contact_name.errors %}<span>{{ error }}</span><br>{% endfor %}</div>
+                    {% else %}
+                        {{ form.contact_name(class="form-control") }}
+                    {% endif %}
+                </div>
+
+                {% if form.contact_email %}
+                <div class="mb-3">
+                    {{ form.contact_email.label(class="form-label") }}
+                    {% if form.contact_email.errors %}
+                        {{ form.contact_email(class="form-control is-invalid") }}
+                        <div class="invalid-feedback">{% for error in form.contact_email.errors %}<span>{{ error }}</span><br>{% endfor %}</div>
+                    {% else %}
+                        {{ form.contact_email(class="form-control") }}
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                {% if form.contact_phone %}
+                <div class="mb-3">
+                    {{ form.contact_phone.label(class="form-label") }}
+                    {% if form.contact_phone.errors %}
+                        {{ form.contact_phone(class="form-control is-invalid") }}
+                        <div class="invalid-feedback">{% for error in form.contact_phone.errors %}<span>{{ error }}</span><br>{% endfor %}</div>
+                    {% else %}
+                        {{ form.contact_phone(class="form-control") }}
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                <div class="mb-3">
+                    {{ form.address.label(class="form-label") }}
+                    {% if form.address.errors %}
+                        {{ form.address(class="form-control is-invalid", rows="3") }}
+                        <div class="invalid-feedback">{% for error in form.address.errors %}<span>{{ error }}</span><br>{% endfor %}</div>
+                    {% else %}
+                        {{ form.address(class="form-control", rows="3") }}
+                    {% endif %}
+                </div>
+            </fieldset>
+            <div class="form-group mt-4">
+                {{ form.submit(class="btn btn-primary") }}
+                <a href="{{ url_for('suppliers.list_suppliers') }}" class="btn btn-secondary ms-2">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

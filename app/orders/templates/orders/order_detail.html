@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} - Warehouse IMS{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">{{ title }}</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a href="{{ url_for('orders.list_orders') }}" class="btn btn-outline-secondary">Back to My Orders</a>
+        {# Belki siparişi yazdırma veya fatura indirme butonu eklenebilir #}
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-7">
+        <h4>Order Items</h4>
+        {% if order.items.all() %}
+        <div class="table-responsive">
+            <table class="table table-sm">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th class="text-center">Quantity</th>
+                        <th class="text-center">Price at Order</th>
+                        <th class="text-end">Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in order.items %}
+                    <tr>
+                        <td>
+                            <a href="{{ url_for('products.product_detail', product_id=item.product_id) }}">
+                                {{ item.product_details.name if item.product_details else 'Product Not Found' }}
+                            </a>
+                        </td>
+                        <td class="text-center">{{ item.quantity }}</td>
+                        <td class="text-center">${{ "%.2f"|format(item.price_at_order) }}</td>
+                        <td class="text-end">${{ "%.2f"|format(item.quantity * item.price_at_order) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="3" class="text-end border-top pt-2"><strong>Order Total:</strong></td>
+                        <td class="text-end border-top pt-2"><strong>${{ "%.2f"|format(order.total_amount) }}</strong></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+        {% else %}
+        <p>No items found for this order.</p>
+        {% endif %}
+    </div>
+    <div class="col-md-5">
+        <h4>Order Information</h4>
+        <dl class="row">
+            <dt class="col-sm-5">Order Number:</dt>
+            <dd class="col-sm-7">{{ order.order_number }}</dd>
+
+            <dt class="col-sm-5">Order Date:</dt>
+            <dd class="col-sm-7">{{ order.order_date.strftime('%Y-%m-%d %H:%M:%S') }}</dd>
+
+            <dt class="col-sm-5">Status:</dt>
+            <dd class="col-sm-7">
+                <span class="badge
+                    {% if order.status == 'Pending' %}bg-warning text-dark
+                    {% elif order.status == 'Processing' %}bg-info text-dark
+                    {% elif order.status == 'Shipped' %}bg-primary
+                    {% elif order.status == 'Delivered' %}bg-success
+                    {% elif order.status == 'Cancelled' %}bg-danger
+                    {% elif order.status == 'Returned' %}bg-secondary
+                    {% else %}bg-light text-dark
+                    {% endif %}">
+                    {{ order.status }}
+                </span>
+            </dd>
+
+            <dt class="col-sm-5">Customer:</dt>
+            <dd class="col-sm-7">{{ order.customer.username if order.customer else 'N/A' }}</dd>
+
+            {# Modelinize shipping_address veya notes eklediyseniz: #}
+            {% if order.shipping_address %}
+            <dt class="col-sm-5">Shipping Address:</dt>
+            <dd class="col-sm-7">{{ order.shipping_address|nl2br }}</dd> {# nl2br yeni satırları <br> yapar #}
+            {% endif %}
+
+            {% if order.notes %}
+            <dt class="col-sm-5">Order Notes:</dt>
+            <dd class="col-sm-7">{{ order.notes|nl2br }}</dd>
+            {% endif %}
+
+            <dt class="col-sm-5">Last Updated:</dt>
+            <dd class="col-sm-7">{{ order.updated_at.strftime('%Y-%m-%d %H:%M:%S') }}</dd>
+        </dl>
+
+        {# Admin için sipariş durumu güncelleme formu eklenebilir #}
+        {#
+        {% if current_user.role == 'Admin' or current_user.role == 'WarehouseManager' %}
+            <h5 class="mt-4">Update Order Status</h5>
+            <form method="POST" action="{{ url_for('orders.update_order_status', order_id=order.id) }}">
+                {{ status_form.hidden_tag() if status_form }}
+                <div class="input-group">
+                    <select name="new_status" class="form-select">
+                        <option value="Pending" {% if order.status == 'Pending' %}selected{% endif %}>Pending</option>
+                        <option value="Processing" {% if order.status == 'Processing' %}selected{% endif %}>Processing</option>
+                        <option value="Shipped" {% if order.status == 'Shipped' %}selected{% endif %}>Shipped</option>
+                        <option value="Delivered" {% if order.status == 'Delivered' %}selected{% endif %}>Delivered</option>
+                        <option value="Cancelled" {% if order.status == 'Cancelled' %}selected{% endif %}>Cancelled</option>
+                    </select>
+                    <button class="btn btn-outline-secondary" type="submit">Update Status</button>
+                </div>
+            </form>
+        {% endif %}
+        #}
+    </div>
+</div>
+{% endblock %}

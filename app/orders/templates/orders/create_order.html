@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} - Warehouse IMS{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">{{ title }}</h1>
+    {# No buttons here, actions will be below the summary #}
+</div>
+
+{% if cart_items %}
+<div class="row">
+    {# Order Summary Column #}
+    <div class="col-lg-8">
+        <h4>Order Summary</h4>
+        <div class="table-responsive mb-3">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col" style="width: 50%;">Product</th>
+                        <th scope="col" class="text-center">Unit Price</th>
+                        <th scope="col" class="text-center">Quantity</th>
+                        <th scope="col" class="text-end">Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in cart_items %}
+                    <tr>
+                        <td>{{ item.name }}</td>
+                        <td class="text-center">${{ "%.2f"|format(item.price) }}</td>
+                        <td class="text-center">{{ item.quantity }}</td>
+                        <td class="text-end">${{ "%.2f"|format(item.subtotal) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr class="table-group-divider">
+                        <td colspan="3" class="text-end fs-4 pt-3"><strong>Total Amount:</strong></td>
+                        <td class="text-end fs-4 pt-3"><strong>${{ "%.2f"|format(current_total_amount) }}</strong></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        {# Shipping Information and Notes Form (Opsiyonel - bu kısım backend tarafından henüz işlenmiyor) #}
+        {# Bu formu aktif hale getirmek için app/orders/routes.py'deki create_order fonksiyonunu #}
+        {# ve gerekirse bir OrderForm'u app/forms.py'ye eklemeniz gerekir. #}
+        <div class="mb-4 p-3 border rounded bg-light">
+            <h5 class="mb-3">Shipping & Order Notes (Optional)</h5>
+            {# Bu formun verilerini işlemek için backend'de değişiklik yapmanız gerekir. #}
+            {# Şimdilik sadece görsel amaçlıdır ve POST edildiğinde create_order'a gider. #}
+            <form method="POST" action="{{ url_for('orders.create_order') }}">
+                {# Eğer CSRF token'ı manuel eklemek isterseniz bir EmptyForm örneği geçip #}
+                {# {{ empty_form.hidden_tag() }} kullanabilirsiniz. #}
+                <div class="mb-3">
+                    <label for="shipping_address" class="form-label">Shipping Address</label>
+                    <textarea class="form-control" id="shipping_address" name="shipping_address" rows="3" placeholder="Enter your full shipping address..."></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="order_notes" class="form-label">Order Notes</label>
+                    <textarea class="form-control" id="order_notes" name="order_notes" rows="2" placeholder="Any special instructions for your order..."></textarea>
+                </div>
+                {# Bu formun kendi submit butonu olmayacak, aşağıdaki ana onay butonu kullanılacak #}
+            </form>
+        </div>
+
+        {# Ana Onay Formu #}
+        <form method="POST" action="{{ url_for('orders.create_order') }}" class="mt-4">
+            <div class="alert alert-secondary" role="alert">
+                Please review your order items above. By clicking "Confirm and Place Order", you agree to finalize this purchase.
+                If you have entered shipping details or notes above, they will be submitted with your order confirmation.
+            </div>
+            <button type="submit" class="btn btn-lg btn-success w-100" onclick="return confirm('Are you sure you want to place this order?');">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-circle-fill me-1" viewBox="0 0 16 16">
+                    <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0m-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+                </svg>
+                Confirm and Place Order
+            </button>
+        </form>
+
+        <div class="text-center mt-3">
+            <a href="{{ url_for('cart.view_cart') }}" class="btn btn-outline-secondary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left-circle-fill me-1" viewBox="0 0 16 16">
+                    <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0m3.5 7.5a.5.5 0 0 1 0 1H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5z"/>
+                </svg>
+                Back to Cart
+            </a>
+        </div>
+    </div>
+
+    {# Customer Information Column #}
+    <div class="col-lg-4">
+        <h4>Your Information</h4>
+        <div class="card">
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">User:</dt>
+                    <dd class="col-sm-8">{{ current_user.username }}</dd>
+
+                    <dt class="col-sm-4">Email:</dt>
+                    <dd class="col-sm-8">{{ current_user.email }}</dd>
+
+                    <dt class="col-sm-4">Role:</dt>
+                    <dd class="col-sm-8">{{ current_user.role }}</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% else %}
+<div class="alert alert-warning mt-3" role="alert">
+    Your cart is empty or could not be loaded. Please <a href="{{ url_for('cart.view_cart') }}" class="alert-link">return to your cart</a> or <a href="{{ url_for('products.list_products') }}" class="alert-link">continue shopping</a>.
+</div>
+{% endif %}
+{% endblock %}

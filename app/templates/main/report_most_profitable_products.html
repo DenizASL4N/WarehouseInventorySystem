@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} - Warehouse IMS{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">{{ title }}</h1>
+    <a href="{{ url_for('main.reports_index') }}" class="btn btn-sm btn-outline-secondary">Back to Reports</a>
+</div>
+
+{% if profitable_products %}
+<h4>Top Profitable Products (Requires Purchase Price)</h4>
+<div class="table-responsive">
+    <table class="table table-striped table-hover table-sm">
+        <thead>
+            <tr>
+                <th>Rank</th>
+                <th>Product Name</th>
+                <th class="text-center">Total Quantity Sold</th>
+                <th class="text-end">Estimated Total Profit</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for product_name, product_id, total_quantity_sold, total_profit in profitable_products %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td><a href="{{ url_for('products.product_detail', product_id=product_id) }}">{{ product_name }}</a></td>
+                <td class="text-center">{{ total_quantity_sold }}</td>
+                <td class="text-end">${{ "%.2f"|format(total_profit if total_profit is not none else 0) }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="alert alert-info" role="alert">
+    No data to calculate profitable products. Ensure products have a purchase price and have been sold.
+</div>
+{% endif %}
+
+<h4 class="mt-5">Most Sold Products (By Quantity)</h4>
+{% if most_sold_products %}
+<div class="table-responsive">
+    <table class="table table-striped table-hover table-sm">
+        <thead>
+            <tr>
+                <th>Rank</th>
+                <th>Product Name</th>
+                <th class="text-center">Total Quantity Sold</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for product_name, product_id, total_quantity_sold in most_sold_products %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td><a href="{{ url_for('products.product_detail', product_id=product_id) }}">{{ product_name }}</a></td>
+                <td class="text-center">{{ total_quantity_sold }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="alert alert-info" role="alert">
+    No sales data found for products.
+</div>
+{% endif %}
+{% endblock %}

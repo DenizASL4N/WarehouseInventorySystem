@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}{{ product.name }} - Product Details{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">{{ product.name }}</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        {% if current_user.is_authenticated and (current_user.role == 'Admin' or current_user.role == 'WarehouseManager') %}
+        <a href="{{ url_for('products.edit_product', product_id=product.id) }}" class="btn btn-outline-primary me-2">
+             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16"><path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.813z"/><path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z"/></svg>
+            Edit Product
+        </a>
+        {% endif %}
+        <a href="{{ url_for('products.list_products') }}" class="btn btn-outline-secondary">Back to Product List</a>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <h5 class="card-title">Product Information</h5>
+        <dl class="row">
+            <dt class="col-sm-3">ID:</dt><dd class="col-sm-9">{{ product.id }}</dd>
+            <dt class="col-sm-3">Name:</dt><dd class="col-sm-9">{{ product.name }}</dd>
+            <dt class="col-sm-3">Category:</dt><dd class="col-sm-9">{{ product.category if product.category else 'N/A' }}</dd>
+            <dt class="col-sm-3">Quantity in Stock:</dt><dd class="col-sm-9">{{ product.quantity_in_stock }}</dd>
+            <dt class="col-sm-3">Price:</dt><dd class="col-sm-9">${{ "%.2f"|format(product.price) }}</dd>
+            <dt class="col-sm-3">Expiry Date:</dt><dd class="col-sm-9">{{ product.expiry_date.strftime('%Y-%m-%d') if product.expiry_date else 'N/A' }}</dd>
+            <dt class="col-sm-3">Description:</dt><dd class="col-sm-9">{{ product.description if product.description else 'No description provided.' }}</dd>
+            <dt class="col-sm-3">Supplier:</dt>
+            <dd class="col-sm-9">{% if product.supplier_details %}{{ product.supplier_details.name }} (ID: {{ product.supplier_details.id }}){% else %}N/A{% endif %}</dd>
+            <dt class="col-sm-3">Warehouse Location:</dt>
+            <dd class="col-sm-9">{% if product.storage_location %}{{ product.storage_location.name if product.storage_location.name else product.storage_location.address }} (ID: {{ product.storage_location.id }}){% else %}N/A{% endif %}</dd>
+            <dt class="col-sm-3">Created At:</dt><dd class="col-sm-9">{{ product.created_at.strftime('%Y-%m-%d %H:%M:%S') if product.created_at else 'N/A' }}</dd>
+            <dt class="col-sm-3">Last Updated At:</dt><dd class="col-sm-9">{{ product.updated_at.strftime('%Y-%m-%d %H:%M:%S') if product.updated_at else 'N/A' }}</dd>
+        </dl>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">Add to Cart</h5>
+        <form action="{{ url_for('cart.add_to_cart', product_id=product.id) }}" method="POST">
+            <div class="row g-3 align-items-center">
+                <div class="col-auto"><label for="quantity-{{product.id}}" class="col-form-label">Quantity:</label></div>
+                <div class="col-auto"><input type="number" id="quantity-{{product.id}}" name="quantity" class="form-control form-control-sm" value="1" min="1" max="{{ product.quantity_in_stock }}" style="width: 80px;" {% if product.quantity_in_stock == 0 %}disabled{% endif %}></div>
+                <div class="col-auto"><button type="submit" class="btn btn-primary" {% if product.quantity_in_stock == 0 %}disabled title="Out of Stock"{% endif %}><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-cart-plus-fill" viewBox="0 0 16 16"><path d="M.5 1a.5.5 0 0 0 0 1h1.11l.401 1.607 1.498 7.985A.5.5 0 0 0 4 12h1a2 2 0 1 0 0 4 2 2 0 0 0 0-4h7a2 2 0 1 0 0 4 2 2 0 0 0 0-4h1a.5.5 0 0 0 .491-.408l1.5-8A.5.5 0 0 0 14.5 3H2.89l-.405-1.621A.5.5 0 0 0 2 1zM6 14a1 1 0 1 1-2 0 1 1 0 0 1 2 0m7 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0m7-11H9.5a.5.5 0 0 1 0-1H13V5.5a.5.5 0 0 1 1 0V7h1.5a.5.5 0 0 1 0 1H14v1.5a.5.5 0 0 1-1 0V8h-1.5a.5.5 0 0 1 0-1H13V5.5a.5.5 0 0 1 .5-.5zM9 5.5V7h1.5a.5.5 0 0 1 0 1H9v1.5a.5.5 0 0 1-1 0V8H6.5a.5.5 0 0 1 0-1H8V5.5a.5.5 0 0 1 1 0z"/></svg> Add to Cart</button></div>
+            </div>
+            {% if product.quantity_in_stock == 0 %}<small class="text-danger d-block mt-1">This product is currently out of stock.</small>{% endif %}
+        </form>
+    </div>
+</div>
+{% endblock %}

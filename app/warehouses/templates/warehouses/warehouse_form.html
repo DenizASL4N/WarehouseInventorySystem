@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} - Warehouse IMS{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <h2 class="mb-4">{{ legend }}</h2>
+        <form method="POST" action="" novalidate>
+            {{ form.hidden_tag() }}
+
+            <fieldset class="form-group">
+                <div class="mb-3">
+                    {{ form.name.label(class="form-label") }}
+                    {% if form.name.errors %}
+                        {{ form.name(class="form-control form-control-lg is-invalid") }}
+                        <div class="invalid-feedback">{% for error in form.name.errors %}<span>{{ error }}</span><br>{% endfor %}</div>
+                    {% else %}
+                        {{ form.name(class="form-control form-control-lg", placeholder="e.g., Main Warehouse (Optional)") }}
+                    {% endif %}
+                </div>
+
+                <div class="mb-3">
+                    {{ form.address.label(class="form-label") }}
+                    {% if form.address.errors %}
+                        {{ form.address(class="form-control is-invalid") }}
+                        <div class="invalid-feedback">{% for error in form.address.errors %}<span>{{ error }}</span><br>{% endfor %}</div>
+                    {% else %}
+                        {{ form.address(class="form-control", placeholder="Full address of the warehouse") }}
+                    {% endif %}
+                </div>
+
+                <div class="mb-3">
+                    {{ form.capacity.label(class="form-label") }}
+                    {% if form.capacity.errors %}
+                        {{ form.capacity(class="form-control is-invalid") }}
+                        <div class="invalid-feedback">{% for error in form.capacity.errors %}<span>{{ error }}</span><br>{% endfor %}</div>
+                    {% else %}
+                        {{ form.capacity(class="form-control", placeholder="e.g., 500") }}
+                    {% endif %}
+                </div>
+            </fieldset>
+            <div class="form-group mt-4">
+                {{ form.submit(class="btn btn-primary") }}
+                <a href="{{ url_for('warehouses.list_warehouses') }}" class="btn btn-secondary ms-2">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
